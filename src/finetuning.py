@@ -4,15 +4,35 @@ from transformers import GPT2LMHeadModel, GPT2Tokenizer, Trainer, TrainingArgume
 from datasets import load_dataset
 
 def generate_text(prompt, model, tokenizer, max_length=100):
+    # Ensure pad_token_id is set
+    if tokenizer.pad_token_id is None:
+        tokenizer.pad_token_id = tokenizer.eos_token_id
+
     input_ids = tokenizer.encode(prompt, return_tensors='pt')
-    output = model.generate(input_ids, max_length=max_length, num_return_sequences=1)
+    attention_mask = input_ids.ne(tokenizer.pad_token_id).long()  # Create attention mask
+    output = model.generate(
+        input_ids,
+        attention_mask=attention_mask,
+        max_length=max_length,
+        num_return_sequences=1,
+        pad_token_id=tokenizer.eos_token_id  # Set pad_token_id to eos_token_id
+    )
     return tokenizer.decode(output[0], skip_special_tokens=True)
 
 def fine_tune_model(model, tokenizer, train_file, output_dir):
-    # Charger le dataset depuis le fichier texte
+    # Load the dataset from the text file
     dataset = load_dataset('text', data_files={'train': train_file})
 
-    # Préparer le modèle pour le fine-tuning
+    # Tokenize the dataset
+    def tokenize_function(examples):
+        # Tokenize the text and create labels
+        tokenized_inputs = tokenizer(examples['text'], padding='max_length', truncation=True, max_length=512)
+        tokenized_inputs['labels'] = tokenized_inputs['input_ids'].copy()  # Use input_ids as labels
+        return tokenized_inputs
+
+    tokenized_datasets = dataset.map(tokenize_function, batched=True)
+
+    # Prepare the model for fine-tuning
     training_args = TrainingArguments(
         output_dir=output_dir,
         per_device_train_batch_size=1,
@@ -21,17 +41,19 @@ def fine_tune_model(model, tokenizer, train_file, output_dir):
         save_total_limit=2,
         logging_steps=100,
         do_train=True,
+        remove_unused_columns=False,
     )
 
     trainer = Trainer(
         model=model,
         args=training_args,
-        train_dataset=dataset['train'],
+        train_dataset=tokenized_datasets['train'],
     )
 
     trainer.train()
     model.save_pretrained(output_dir)
     tokenizer.save_pretrained(output_dir)
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
