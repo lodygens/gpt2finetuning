@@ -24,11 +24,45 @@ pip install transformers datasets torch transformers[torch] numpy
 ```
 
 ## Execution
-Deux paramètres sont attendus sur la ligne de commande
-- un prompt
-- un ficher texte ; vous pouvez utiliser [GPT2 / shakespeare.txt](https://github.com/Paperspace/gpt-2/blob/master/shakespeare.txt)
-
-Exemple
+Des paramètres sont attendus sur la ligne de commande; l'argument `--help` est ton ami.
 ```
-python src/finetuning.py "The secret of life is" data/shakespeare.txt
+python src/finetuning.py --help
+usage: finetuning.py [-h] [--finetune] [--fine_tune_file FINE_TUNE_FILE] [--usetuned] [--checkpoint_dir CHECKPOINT_DIR] prompt
+
+Fine-tune or use a pre-trained GPT-2 model.
+
+positional arguments:
+  prompt                The prompt to generate text from.
+
+options:
+  -h, --help            show this help message and exit
+  --finetune            Fine-tune the model using FINE_TUNE_FILE
+  --fine_tune_file FINE_TUNE_FILE
+                        The text file to use for fine-tuning.
+  --usetuned            Use the fine-tuned model from CHECKPOINT_DIR.
+  --checkpoint_dir CHECKPOINT_DIR
+                        The directory of the checkpoint to use.
+```
+
+## Fine tuning
+
+Le programme permet d'affiner gpt2 avec un fichier local.
+
+Comme fichier de fine tuning,  vous pouvez utiliser [GPT2 / shakespeare.txt](https://github.com/Paperspace/gpt-2/blob/master/shakespeare.txt)
+
+Executez
+```
+python src/finetuning.py  --finetune   --fine_tune_file PATH_TO/shakespeare.txt
+```
+
+Le resultat de l'affinage est stocké dans le répertoire `fine_tuned_model`.
+
+## Inference avec le fine tuning
+
+Le programme permet d'utiliser l'affinage stocké dans le répertoire `fine_tuned_model`.
+
+
+Executez
+```
+python src/finetuning.py --prompt "The secret of life is" --usetuned   --checkpoint_dir fine_tuned_model
 ```
