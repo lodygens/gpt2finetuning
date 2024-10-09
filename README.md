@@ -20,13 +20,13 @@ Je l'ai tourné sur un Mac M2 avec 16Gb RAM; le fine tuning a pris 60mn.
 ```
 python -m venv .
 source bin/activate
-pip install transformers datasets torch transformers[torch]
+pip install transformers datasets torch transformers[torch] numpy
 ```
 
 ## Execution
 Deux paramètres sont attendus sur la ligne de commande
 - un prompt
-- un ficher text ; vous pouvez utiliser [GPT2 / shakespeare.txt](https://github.com/Paperspace/gpt-2/blob/master/shakespeare.txt)
+- un ficher texte ; vous pouvez utiliser [GPT2 / shakespeare.txt](https://github.com/Paperspace/gpt-2/blob/master/shakespeare.txt)
 
 Exemple
 ```
