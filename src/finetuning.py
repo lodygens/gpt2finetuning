@@ -19,7 +19,7 @@ def generate_text(prompt, model, tokenizer, max_length=100):
     )
     return tokenizer.decode(output[0], skip_special_tokens=True)
 
-def fine_tune_model(model, tokenizer, train_file, output_dir):
+def fine_tune_model(model, tokenizer, train_file, output_dir, resume_from_checkpoint=None):
     # Load the dataset from the text file
     dataset = load_dataset('text', data_files={'train': train_file})
 
@@ -42,6 +42,7 @@ def fine_tune_model(model, tokenizer, train_file, output_dir):
         logging_steps=100,
         do_train=True,
         remove_unused_columns=False,
+        resume_from_checkpoint=resume_from_checkpoint  # Ajout de cet argument
     )
 
     trainer = Trainer(
@@ -74,8 +75,8 @@ if __name__ == "__main__":
     generated_text_before = generate_text(prompt, model, tokenizer)
     print(generated_text_before)
 
-    # Fine-tuning du modèle
-    fine_tune_model(model, tokenizer, fine_tune_file, output_dir)
+    last_checkpoint = None #"./fine_tuned_model/checkpoint-last"  # Remplacez par le chemin réel du dernier checkpoint
+    fine_tune_model(model, tokenizer, fine_tune_file, output_dir, resume_from_checkpoint=last_checkpoint)
 
     # Charger le modèle fine-tuné
     model_fine_tuned = GPT2LMHeadModel.from_pretrained(output_dir)
