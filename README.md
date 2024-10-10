@@ -27,19 +27,31 @@ pip install transformers datasets torch transformers[torch] numpy
 Des paramètres sont attendus sur la ligne de commande; l'argument `--help` est ton ami.
 ```
 python src/finetuning.py --help
-usage: finetuning.py [-h] [--finetune] [--usetuned] [--fine_tune_file FINE_TUNE_FILE] [--checkpoint_dir CHECKPOINT_DIR] [--prompt PROMPT]
+usage: finetuning.py [-h] [--usebase] [--finetune] [--fine_tune_file FINE_TUNE_FILE] [--usetuned] [--checkpoint_dir CHECKPOINT_DIR] [--prompt PROMPT]
+                     [--verbose]
 
 Fine-tune or use a pre-trained GPT-2 model.
 
 options:
   -h, --help            show this help message and exit
+  --usebase             Use the base GPT-2 model without fine-tuning.
   --finetune            Fine-tune the model.
-  --usetuned            Use the fine-tuned model from a checkpoint.
   --fine_tune_file FINE_TUNE_FILE
                         The file to use for fine-tuning.
+  --usetuned            Use the fine-tuned model from a checkpoint.
   --checkpoint_dir CHECKPOINT_DIR
                         The directory of the checkpoint to use.
   --prompt PROMPT       The prompt to generate text from.
+  --verbose             Verbose mode.
+```
+
+## Inference sans fine tuning
+
+Le programme permet d'utiliser gpt2 tel quel.
+
+Executez
+```
+python src/finetuning.py  --userbase --prompt "The secret of life is"
 ```
 
 ## Fine tuning

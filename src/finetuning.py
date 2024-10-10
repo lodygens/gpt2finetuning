@@ -66,46 +66,49 @@ def fine_tune_model(model, tokenizer, train_file, output_dir, resume_from_checkp
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Fine-tune or use a pre-trained GPT-2 model.")
+    parser.add_argument("--usebase", action="store_true", help="Use the base GPT-2 model without fine-tuning.")
     parser.add_argument("--finetune", action="store_true", help="Fine-tune the model.")
-    parser.add_argument("--usetuned", action="store_true", help="Use the fine-tuned model from a checkpoint.")
     parser.add_argument("--fine_tune_file", type=str, help="The file to use for fine-tuning.")
-    parser.add_argument("--checkpoint_dir", type=str, help="The directory of the checkpoint to use.")
-    parser.add_argument("--prompt", type=str, help="The prompt to generate text from.")
+    parser.add_argument("--usetuned", action="store_true", help="Use the fine-tuned model from a checkpoint.")
+    parser.add_argument("--checkpoint_dir", type=str, help="The directory of the checkpoint to use.", default="fine_tuned_model")
+    parser.add_argument("--prompt", type=str, help="The prompt to generate text from.", default="The secret of life is")
+    parser.add_argument("--verbose", action="store_true", help="Verbose mode.")
 
     args = parser.parse_args()
 
-    # Ensure that either --finetune or --usetuned is provided
-    if not (args.finetune or args.usetuned):
-        parser.error("You must specify either --finetune or --usetuned.")
+    if not (args.finetune or args.usetuned or args.usebase):
+        parser.error("You must specify either --finetune, --usetuned or --usebase")
 
-    # Ensure fine_tune_file is provided if --finetune is specified
     if args.finetune and not args.fine_tune_file:
         parser.error("--fine_tune_file is required when --finetune is specified.")
 
-    # Ensure checkpoint_dir and prompt are provided if --usetuned is specified
-    if args.usetuned:
-        if not args.checkpoint_dir:
-            parser.error("--checkpoint_dir is required when --usetuned is specified.")
-        if not args.prompt:
-            parser.error("--prompt is required when --usetuned is specified.")
+    if args.verbose:
+        print("CHECKPOINT_DIR : ", args.checkpoint_dir)
+        print("PROMPT         : ", args.prompt)
 
     output_dir = "./fine_tuned_model"
     model_name = "gpt2"
 
     if args.finetune:
-        # Load the model and tokenizer
+        print("Fine tuning")
         model = GPT2LMHeadModel.from_pretrained(model_name)
         tokenizer = GPT2Tokenizer.from_pretrained(model_name)
 
-        # Fine-tune the model
         fine_tune_model(model, tokenizer, args.fine_tune_file, output_dir)
 
     if args.usetuned:
-        # Load the model and tokenizer from the specified checkpoint
         model = GPT2LMHeadModel.from_pretrained(args.checkpoint_dir)
         tokenizer = GPT2Tokenizer.from_pretrained(args.checkpoint_dir)
 
-        # Generate text with the loaded model
         print("Text generated with the model loaded from the checkpoint:")
         generated_text = generate_text(args.prompt, model, tokenizer)
         print(generated_text)
+
+    if args.usebase:
+        model = GPT2LMHeadModel.from_pretrained(model_name)
+        tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+
+        print("Text generated with the base GPT-2 model:")
+        generated_text = generate_text(args.prompt, model, tokenizer)
+        print(generated_text)
+
